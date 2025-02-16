@@ -14,7 +14,7 @@ def is_admin(user):
 @user_passes_test(is_admin)
 def admin_dashboard(request):
     # Get platform statistics
-    total_users = User.objects.count()
+    total_users = User.objects.filter(is_active=True, is_superuser=False).count()
     total_photographers = User.objects.filter(userprofile__user_type='photographer').count()
     total_clients = User.objects.filter(userprofile__user_type='client').count()
     total_bookings = Booking.objects.count()
