@@ -19,7 +19,8 @@
                             <option value="client" {% if user_type == 'client' %}selected{% endif %}>Clients</option>
                         </select>
                         <button type="submit" class="btn btn-primary">Filter</button>
-                    </form>
+                    </form><br>
+                    <a href="{% url 'admin_create_user' %}" class="btn btn-success">Create User</a>
                 </div>
                 <div class="col-md-6">
                     <form method="get" class="d-flex gap-2 justify-content-md-end">

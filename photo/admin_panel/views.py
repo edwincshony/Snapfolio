@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from .models import User
 from django.contrib import messages
 from django.contrib.auth.models import User
+from .forms import AdminUserCreationForm
 from photographer.models import Portfolio
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -174,4 +175,18 @@ def approve_portfolio(request, portfolio_id):
 @login_required
 def user_activity_logs(request):
     logs = UserActivityLog.objects.all().order_by('-timestamp')
-    return render(request, 'admin/user_activity_logs.html', {'logs': logs})
+    return render(request, 'admin_panel/user_activity_logs.html', {'logs': logs})
+
+@login_required
+@user_passes_test(is_admin)
+def admin_create_user(request):
+    if request.method == "POST":
+        form = AdminUserCreationForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, "User created successfully!")
+            return redirect('admin_user_list')  # Redirect to user list page
+    else:
+        form = AdminUserCreationForm()
+    
+    return render(request, 'admin_panel/admin_create_user.html', {'form': form})

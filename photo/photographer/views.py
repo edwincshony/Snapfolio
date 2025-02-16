@@ -10,9 +10,9 @@ from django.contrib.auth.models import User
 
 @login_required
 def create_portfolio(request):
-    if hasattr(request.user, 'portfolio'):
+    if Portfolio.objects.filter(photographer=request.user).exists():
         return redirect('edit_portfolio')
-        
+
     if request.method == 'POST':
         form = PortfolioForm(request.POST)
         if form.is_valid():
@@ -23,7 +23,9 @@ def create_portfolio(request):
             return redirect('portfolio_detail', pk=portfolio.pk)
     else:
         form = PortfolioForm()
+
     return render(request, 'photographer/create_portfolio.html', {'form': form})
+
 
 @login_required
 def edit_portfolio(request):
