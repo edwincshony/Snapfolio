@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Portfolio, Image, ClientFeedback
+from client.models import Booking  # Import the Booking model
 from .forms import PortfolioForm, ImageForm, ClientFeedbackForm, PhotographerResponseForm
 from django.contrib.auth.models import User
 
@@ -139,3 +140,29 @@ def delete_image(request, image_id):
         return redirect('portfolio_detail', pk=portfolio_id)
     
     return redirect('portfolio_detail', pk=image.portfolio.id)
+
+
+@login_required
+def photographer_bookings(request):
+    """View for photographers to manage their bookings."""
+    portfolio = get_object_or_404(Portfolio, photographer=request.user)
+    bookings = Booking.objects.filter(photographer=portfolio).order_by('-created_at')
+    return render(request, 'photographer/photographer_bookings.html', {'bookings': bookings})
+
+@login_required
+def update_booking_status(request, booking_id):
+    """Allows photographers to update the status of bookings."""
+    booking = get_object_or_404(Booking, id=booking_id, photographer__photographer=request.user)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in ['pending', 'confirmed', 'completed', 'canceled']:
+            booking.status = new_status
+            booking.save()
+            messages.success(request, f'Booking status updated to {new_status.capitalize()}.')
+        else:
+            messages.error(request, 'Invalid status selection.')
+
+    return redirect('photographer_bookings')
+
+

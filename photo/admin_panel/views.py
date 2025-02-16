@@ -49,6 +49,7 @@ def admin_dashboard(request):
 @user_passes_test(is_admin)
 def portfolio_approval(request, portfolio_id):
     portfolio = get_object_or_404(Portfolio, pk=portfolio_id)
+    
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'approve':
@@ -58,7 +59,10 @@ def portfolio_approval(request, portfolio_id):
         elif action == 'reject':
             portfolio.delete()
             messages.success(request, f'Portfolio for {portfolio.photographer.username} has been rejected.')
-    return redirect('admin_dashboard')
+        return redirect('admin_dashboard')
+    
+    # Handle GET request by rendering the approval template
+    return render(request, 'admin_panel/portfolio_approval.html', {'portfolio': portfolio})
 
 @user_passes_test(is_admin)
 def user_management(request):

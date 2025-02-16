@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Bookings{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Manage Your Bookings</h2>
+
+    {% if bookings %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Event Date</th>
+                        <th>Event Type</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.client.get_full_name|default:booking.client.username }}</td>
+                            <td>{{ booking.event_date|date:"M d, Y" }}</td>
+                            <td>{{ booking.event_type }}</td>
+                            <td>{{ booking.location }}</td>
+                            <td>
+                                <span class="badge {% if booking.status == 'pending' %}bg-warning
+                                    {% elif booking.status == 'confirmed' %}bg-success
+                                    {% elif booking.status == 'completed' %}bg-info
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ booking.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                <form method="post" action="{% url 'update_booking_status' booking.id %}">
+                                    {% csrf_token %}
+                                    <select name="status" class="form-select form-select-sm d-inline w-auto">
+                                        <option value="pending" {% if booking.status == "pending" %}selected{% endif %}>Pending</option>
+                                        <option value="confirmed" {% if booking.status == "confirmed" %}selected{% endif %}>Confirmed</option>
+                                        <option value="completed" {% if booking.status == "completed" %}selected{% endif %}>Completed</option>
+                                        <option value="canceled" {% if booking.status == "canceled" %}selected{% endif %}>Canceled</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            <p>No bookings yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

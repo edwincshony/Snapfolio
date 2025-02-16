@@ -9,4 +9,7 @@ urlpatterns = [
     path('respond-to-feedback/<int:feedback_id>/', views.respond_to_feedback, name='respond_to_feedback'),
     path('edit-image/<int:image_id>/', views.edit_image, name='edit_image'),
     path('delete-image/<int:image_id>/', views.delete_image, name='delete_image'),
+
+    path('photographer/bookings/', views.photographer_bookings, name='photographer_bookings'),
+    path('booking/<int:booking_id>/update-status/', views.update_booking_status, name='update_booking_status'),
 ]

@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'photographer',
     'client',
     'user_management',
+    'crispy_forms', 
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -120,6 +122,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Crispy Forms settings
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 # Media files configuration
 MEDIA_URL = '/media/'

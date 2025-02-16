@@ -25,6 +25,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'create_portfolio' %}">My Portfolio</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'photographer_bookings' %}">Manage Bookings</a>
+                            </li>
                         {% elif user.userprofile.user_type == 'client' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'my_bookings' %}">My Bookings</a>
