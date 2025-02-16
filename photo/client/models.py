@@ -35,3 +35,5 @@ class Inquiry(models.Model):
 
     def __str__(self):
         return f"Inquiry from {self.client.username} to {self.photographer.photographer.username}"
+
+

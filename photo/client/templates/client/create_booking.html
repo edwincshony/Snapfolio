@@ -26,6 +26,16 @@
                 {% csrf_token %}
                 <div class="mb-3">
                     {{ form|crispy }}
+                    <!-- Add min attribute to the date field -->
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            const today = new Date().toISOString().split('T')[0];
+                            const dateInput = document.querySelector("input[type='date']");
+                            if (dateInput) {
+                                dateInput.setAttribute("min", today);
+                            }
+                        });
+                    </script>
                 </div>
                 <button type="submit" class="btn btn-success">Submit Booking</button>
                 <a href="{% url 'portfolio_detail' portfolio.pk %}" class="btn btn-secondary">Cancel</a>

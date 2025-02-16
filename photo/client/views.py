@@ -77,3 +77,40 @@ def create_inquiry(request, portfolio_id):
 def my_inquiries(request):
     inquiries = Inquiry.objects.filter(client=request.user).order_by('-created_at')
     return render(request, 'client/my_inquiries.html', {'inquiries': inquiries})
+
+
+@login_required
+def edit_inquiry(request, inquiry_id):
+    inquiry = get_object_or_404(Inquiry, id=inquiry_id, client=request.user)
+
+    # Prevent editing if the inquiry is resolved or has a response
+    if inquiry.is_resolved or inquiry.response:
+        messages.warning(request, "You cannot edit this inquiry after it has been resolved or responded to.")
+        return redirect('my_inquiries')
+
+    if request.method == 'POST':
+        form = InquiryForm(request.POST, instance=inquiry)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Inquiry updated successfully!")
+            return redirect('my_inquiries')
+    else:
+        form = InquiryForm(instance=inquiry)
+
+    return render(request, 'client/edit_inquiry.html', {'form': form, 'inquiry': inquiry})
+
+
+@login_required
+def delete_inquiry(request, inquiry_id):
+    inquiry = get_object_or_404(Inquiry, id=inquiry_id, client=request.user)
+
+    # Prevent deleting if the inquiry is resolved
+    if inquiry.is_resolved:
+        messages.warning(request, "You cannot delete a resolved inquiry.")
+        return redirect('my_inquiries')
+
+    inquiry.delete()
+    messages.success(request, "Inquiry deleted successfully!")
+    return redirect('my_inquiries')
+
+
