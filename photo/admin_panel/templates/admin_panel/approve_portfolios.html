@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Pending Portfolios</h2>
+<table>
+    <tr>
+        <th>Photographer</th>
+        <th>Specialization</th>
+        <th>Action</th>
+    </tr>
+    {% for portfolio in portfolios %}
+    <tr>
+        <td>{{ portfolio.photographer.username }}</td>
+        <td>{{ portfolio.specialization }}</td>
+        <td>
+            <a href="{% url 'approve_portfolio' portfolio.id %}">Approve</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

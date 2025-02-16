@@ -21,7 +21,7 @@ class PlatformStatistics(models.Model):
 
 class PortfolioAnalytics(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='analytics')
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()  # Removed auto_now_add=True
     views = models.IntegerField(default=0)
     inquiries = models.IntegerField(default=0)
     bookings = models.IntegerField(default=0)
@@ -33,6 +33,7 @@ class PortfolioAnalytics(models.Model):
 
     def __str__(self):
         return f"Analytics for {self.portfolio.photographer.username} on {self.date}"
+
 
 class AdminNotification(models.Model):
     title = models.CharField(max_length=200)
@@ -48,3 +49,22 @@ class AdminNotification(models.Model):
 
     def __str__(self):
         return f"{self.notification_type}: {self.title}"
+
+class Portfolio(models.Model):
+    photographer = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_portfolio')
+    specialization = models.CharField(max_length=100)
+    bio = models.TextField()
+    is_approved = models.BooleanField(default=False)  # New field for approval
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.photographer.username}'s Portfolio"
+
+class UserActivityLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activity_logs')
+    action = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action} at {self.timestamp}"

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Admin Notifications</h1>
+
+        {% if notifications %}
+            <div>
+                {% for notification in notifications %}
+                    <div class="notification {% if not notification.is_read %}unread{% endif %}">
+                        <p>{{ notification.message }}</p>
+                        <small>Created at: {{ notification.created_at|date:"M d, Y H:i" }}</small>
+
+                        {% if not notification.is_read %}
+                            <a href="{% url 'mark_notification_read' notification.id %}">Mark as Read</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No notifications available.</p>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block styles %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .notification {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+        .unread {
+            background-color: #f9f9f9;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}

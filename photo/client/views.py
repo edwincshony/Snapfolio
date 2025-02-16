@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from .models import Booking, Inquiry
 from .forms import BookingForm, InquiryForm, InquiryResponseForm
 from photographer.models import Portfolio
 from django.db.models import Q
+from django.contrib.auth.models import User
 
 def browse_portfolios(request):
     # Get the specialization filter from the query parameters
@@ -112,5 +115,7 @@ def delete_inquiry(request, inquiry_id):
     inquiry.delete()
     messages.success(request, "Inquiry deleted successfully!")
     return redirect('my_inquiries')
+
+
 
 

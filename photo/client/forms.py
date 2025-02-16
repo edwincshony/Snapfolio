@@ -17,3 +17,6 @@ class InquiryResponseForm(forms.ModelForm):
     class Meta:
         model = Inquiry
         fields = ['response']
+
+
+

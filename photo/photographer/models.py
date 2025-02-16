@@ -10,7 +10,7 @@ class Portfolio(models.Model):
         ('wildlife', 'Wildlife Photography'),
     ]
 
-    photographer = models.OneToOneField(User, on_delete=models.CASCADE)
+    photographer = models.OneToOneField(User, on_delete=models.CASCADE,related_name='photographer_portfolio')
     title = models.CharField(max_length=200)
     description = models.TextField()
     specialization = models.CharField(max_length=20, choices=SPECIALIZATION_CHOICES)

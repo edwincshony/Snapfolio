@@ -37,3 +37,6 @@ class Inquiry(models.Model):
         return f"Inquiry from {self.client.username} to {self.photographer.photographer.username}"
 
 
+
+
+

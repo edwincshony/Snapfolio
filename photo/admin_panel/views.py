@@ -1,10 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
+from .models import User
 from django.contrib import messages
 from django.contrib.auth.models import User
 from photographer.models import Portfolio
+from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from client.models import Booking
-from .models import PlatformStatistics, PortfolioAnalytics, AdminNotification
+from django.db.models import Q
+from .models import PlatformStatistics, PortfolioAnalytics, AdminNotification,UserActivityLog
 from django.db.models import Count, Avg
 from django.utils import timezone
 
@@ -64,10 +68,39 @@ def portfolio_approval(request, portfolio_id):
     # Handle GET request by rendering the approval template
     return render(request, 'admin_panel/portfolio_approval.html', {'portfolio': portfolio})
 
-@user_passes_test(is_admin)
+""" @user_passes_test(is_admin)
 def user_management(request):
     users = User.objects.all().order_by('-date_joined')
-    return render(request, 'admin_panel/user_management.html', {'users': users})
+    return render(request, 'admin_panel/user_management.html', {'users': users}) """
+
+@user_passes_test(is_admin)
+def user_management(request):
+    # Get query parameters from the request
+    user_type = request.GET.get('user_type', '')
+    search_query = request.GET.get('search', '')
+
+    # Start with all users
+    users = User.objects.all().order_by('-date_joined')
+
+    # Apply filters based on user_type
+    if user_type:
+        users = users.filter(userprofile__user_type=user_type)
+
+    # Apply search filter
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    context = {
+        'users': users,
+        'user_type': user_type,
+        'search': search_query,
+    }
+    return render(request, 'admin_panel/user_management.html', context)
 
 @user_passes_test(is_admin)
 def toggle_user_status(request, user_id):
@@ -81,27 +114,41 @@ def toggle_user_status(request, user_id):
 
 @user_passes_test(is_admin)
 def analytics(request):
+    # Get today's date
+    today = timezone.now().date()
+    
     # Get portfolio performance statistics
     portfolio_stats = Portfolio.objects.annotate(
         avg_rating=Avg('feedback__rating'),
         total_bookings=Count('bookings'),
         total_inquiries=Count('inquiries')
     )
-    
-    # Save portfolio analytics
+
     for portfolio in portfolio_stats:
-        PortfolioAnalytics.objects.create(
+        analytics_entry, created = PortfolioAnalytics.objects.get_or_create(
             portfolio=portfolio,
-            views=0,  # You'll need to implement view tracking
-            inquiries=portfolio.total_inquiries,
-            bookings=portfolio.total_bookings,
-            average_rating=portfolio.avg_rating or 0.0
+            date=today,
+            defaults={
+                'views': 0,  # Implement actual view tracking
+                'inquiries': portfolio.total_inquiries,
+                'bookings': portfolio.total_bookings,
+                'average_rating': portfolio.avg_rating or 0.0
+            }
         )
-    
+
+        # If the entry already exists, update the values instead of creating a new record
+        if not created:
+            analytics_entry.inquiries = portfolio.total_inquiries
+            analytics_entry.bookings = portfolio.total_bookings
+            analytics_entry.average_rating = portfolio.avg_rating or 0.0
+            analytics_entry.save()
+
     context = {
         'portfolio_stats': portfolio_stats,
     }
     return render(request, 'admin_panel/analytics.html', context)
+
+
 
 @user_passes_test(is_admin)
 def notification_list(request):
@@ -114,3 +161,17 @@ def mark_notification_read(request, notification_id):
     notification.is_read = True
     notification.save()
     return redirect('notification_list')
+
+@login_required
+@staff_member_required
+def approve_portfolio(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id)
+    portfolio.is_approved = True
+    portfolio.save()
+    messages.success(request, "Portfolio approved successfully.")
+    return redirect('admin_dashboard')
+
+@login_required
+def user_activity_logs(request):
+    logs = UserActivityLog.objects.all().order_by('-timestamp')
+    return render(request, 'admin/user_activity_logs.html', {'logs': logs})

@@ -1,9 +1,32 @@
 {% extends 'base.html' %}
-
 {% block title %}Admin Dashboard{% endblock %}
-
 {% block content %}
 <div class="container-fluid py-4">
+    <!-- Navigation Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="{% url 'admin_dashboard' %}">Admin Dashboard</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'user_management' %}">User Management</a>
+                        </li>
+                       <!--  <li class="nav-item">
+                            <a class="nav-link" href="{% url 'analytics' %}">Analytics</a>
+                        </li>  -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'user_activity_logs' %}">User Activity Logs</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+
     <!-- Stats Cards Row -->
     <div class="row mb-4">
         <div class="col-md-4 col-lg">
@@ -47,7 +70,6 @@
             </div>
         </div>
     </div>
-
     <div class="row">
         <!-- Pending Portfolios -->
         <div class="col-md-8">
@@ -89,9 +111,8 @@
                 </div>
             </div>
         </div>
-
         <!-- Recent Notifications -->
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Recent Notifications</h5>
@@ -113,7 +134,7 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 {% endblock %}
