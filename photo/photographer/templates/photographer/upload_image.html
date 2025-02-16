@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Image{% endblock %}
+
+{% block extra_css %}
+<style>
+    .image-preview {
+        max-width: 300px;
+        max-height: 300px;
+        margin: 10px 0;
+        display: none;
+    }
+    .drag-drop-zone {
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    .drag-drop-zone:hover {
+        border-color: #0d6efd;
+        background-color: #f1f8ff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Upload Image to Portfolio</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        
+                        <!-- Drag and Drop Zone -->
+                        <div class="drag-drop-zone mb-4" id="dragDropZone">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                            <p class="mb-0">Drag and drop your image here</p>
+                            <p class="text-muted">or</p>
+                            <label for="{{ form.image.id_for_label }}" class="btn btn-primary">
+                                Select Image
+                            </label>
+                            {{ form.image }}
+                        </div>
+
+                        <!-- Image Preview -->
+                        <div class="text-center mb-4">
+                            <img id="imagePreview" class="image-preview img-fluid rounded" alt="Image preview">
+                        </div>
+
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                            {{ form.title.errors }}
+                            {{ form.title }}
+                            {% if form.title.help_text %}
+                                <small class="form-text text-muted">{{ form.title.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description.errors }}
+                            {{ form.description }}
+                            {% if form.description.help_text %}
+                                <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Category Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">Category</label>
+                            {{ form.category.errors }}
+                            {{ form.category }}
+                            {% if form.category.help_text %}
+                                <small class="form-text text-muted">{{ form.category.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Upload Image</button>
+                            <a href="{% url 'portfolio_detail' request.user.portfolio.id %}" class="btn btn-outline-secondary">Back to Portfolio</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dragDropZone = document.getElementById('dragDropZone');
+    const imageInput = document.querySelector('input[type="file"]');
+    const imagePreview = document.getElementById('imagePreview');
+    const form = document.getElementById('uploadForm');
+
+    // Style the file input
+    imageInput.style.display = 'none';
+    
+    // Handle drag and drop
+    dragDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dragDropZone.style.borderColor = '#0d6efd';
+        dragDropZone.style.backgroundColor = '#f1f8ff';
+    });
+
+    dragDropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dragDropZone.style.borderColor = '#ccc';
+        dragDropZone.style.backgroundColor = '#f8f9fa';
+    });
+
+    dragDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragDropZone.style.borderColor = '#ccc';
+        dragDropZone.style.backgroundColor = '#f8f9fa';
+        
+        if (e.dataTransfer.files.length) {
+            imageInput.files = e.dataTransfer.files;
+            showPreview(e.dataTransfer.files[0]);
+        }
+    });
+
+    // Handle file input change
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            showPreview(e.target.files[0]);
+        }
+    });
+
+    // Show image preview
+    function showPreview(file) {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.style.display = 'block';
+                imagePreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Form validation
+    form.addEventListener('submit', (e) => {
+        if (!imageInput.files.length) {
+            e.preventDefault();
+            alert('Please select an image to upload');
+        }
+    });
+});
+</script>
+{% endblock %}

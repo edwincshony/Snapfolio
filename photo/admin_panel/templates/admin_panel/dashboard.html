@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-md-4 col-lg">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h2 class="mb-0">{{ total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Photographers</h5>
+                    <h2 class="mb-0">{{ total_photographers }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Clients</h5>
+                    <h2 class="mb-0">{{ total_clients }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Bookings</h5>
+                    <h2 class="mb-0">{{ total_bookings }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Portfolios</h5>
+                    <h2 class="mb-0">{{ total_portfolios }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Pending Portfolios -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Pending Portfolio Approvals</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_portfolios %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Photographer</th>
+                                        <th>Title</th>
+                                        <th>Specialization</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for portfolio in pending_portfolios %}
+                                        <tr>
+                                            <td>{{ portfolio.photographer.username }}</td>
+                                            <td>{{ portfolio.title }}</td>
+                                            <td>{{ portfolio.get_specialization_display }}</td>
+                                            <td>{{ portfolio.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'portfolio_approval' portfolio.id %}" class="btn btn-sm btn-primary">Review</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No pending portfolios for approval.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Notifications -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Recent Notifications</h5>
+                    <a href="{% url 'notification_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if notifications %}
+                        <div class="list-group list-group-flush">
+                            {% for notification in notifications %}
+                                <div class="list-group-item">
+                                    <h6 class="mb-1">{{ notification.title }}</h6>
+                                    <p class="mb-1 text-muted">{{ notification.message }}</p>
+                                    <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No new notifications.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

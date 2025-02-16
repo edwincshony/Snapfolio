@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Platform Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Time Period Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form method="get" class="d-flex gap-2">
+                <select name="period" class="form-select" aria-label="Select time period" style="width: auto;">
+                    <option value="7" {% if period == '7' %}selected{% endif %}>Last 7 Days</option>
+                    <option value="30" {% if period == '30' %}selected{% endif %}>Last 30 Days</option>
+                    <option value="90" {% if period == '90' %}selected{% endif %}>Last 90 Days</option>
+                    <option value="365" {% if period == '365' %}selected{% endif %}>Last Year</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Apply</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Growth Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-0">User Growth</h6>
+                    <h2 class="mb-2">{{ user_growth|default:"N/A" }}%</h2>
+                    <p class="mb-0 text-{% if user_growth >= 0 %}success{% else %}danger{% endif %}">
+                        <i class="fas fa-arrow-{% if user_growth >= 0 %}up{% else %}down{% endif %}" aria-hidden="true"></i>
+                        From previous period
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-0">Booking Growth</h6>
+                    <h2 class="mb-2">{{ booking_growth|default:"N/A" }}%</h2>
+                    <p class="mb-0 text-{% if booking_growth >= 0 %}success{% else %}danger{% endif %}">
+                        <i class="fas fa-arrow-{% if booking_growth >= 0 %}up{% else %}down{% endif %}" aria-hidden="true"></i>
+                        From previous period
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-0">Portfolio Growth</h6>
+                    <h2 class="mb-2">{{ portfolio_growth|default:"N/A" }}%</h2>
+                    <p class="mb-0 text-{% if portfolio_growth >= 0 %}success{% else %}danger{% endif %}">
+                        <i class="fas fa-arrow-{% if portfolio_growth >= 0 %}up{% else %}down{% endif %}" aria-hidden="true"></i>
+                        From previous period
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted mb-0">Avg. Booking Value</h6>
+                    <h2 class="mb-2">${{ avg_booking_value|default:"N/A" }}</h2>
+                    <p class="mb-0 text-{% if booking_value_growth >= 0 %}success{% else %}danger{% endif %}">
+                        <i class="fas fa-arrow-{% if booking_value_growth >= 0 %}up{% else %}down{% endif %}" aria-hidden="true"></i>
+                        {{ booking_value_growth|default:"N/A" }}% from previous
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">User Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="userDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Booking Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="bookingTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Top Photographers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Photographer</th>
+                                    <th scope="col">Bookings</th>
+                                    <th scope="col">Revenue</th>
+                                    <th scope="col">Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for photographer in top_photographers %}
+                                    <tr>
+                                        <td>{{ photographer.username }}</td>
+                                        <td>{{ photographer.total_bookings }}</td>
+                                        <td>${{ photographer.total_revenue }}</td>
+                                        <td>
+                                            <span class="text-warning">
+                                                <i class="fas fa-star" aria-hidden="true"></i>
+                                            </span>
+                                            {{ photographer.avg_rating|floatformat:1 }}
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No photographers found.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Popular Specializations</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="specializationChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Safely retrieve JSON data from the script elements generated by json_script
+    const userDistributionData = JSON.parse(document.getElementById('user-distribution-data').textContent);
+    const bookingTrendsData = JSON.parse(document.getElementById('booking-trends-data').textContent);
+    const specializationData = JSON.parse(document.getElementById('specialization-data').textContent);
+
+    // User Distribution Chart
+    new Chart(document.getElementById('userDistributionChart'), {
+        type: 'pie',
+        data: {
+            labels: userDistributionData.labels,
+            datasets: [{
+                data: userDistributionData.data,
+                backgroundColor: ['#4e73df', '#1cc88a']
+            }]
+        }
+    });
+
+    // Booking Trends Chart
+    new Chart(document.getElementById('bookingTrendsChart'), {
+        type: 'line',
+        data: {
+            labels: bookingTrendsData.labels,
+            datasets: [{
+                label: 'Bookings',
+                data: bookingTrendsData.data,
+                borderColor: '#4e73df',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Specialization Chart
+    new Chart(document.getElementById('specializationChart'), {
+        type: 'bar',
+        data: {
+            labels: specializationData.labels,
+            datasets: [{
+                label: 'Number of Photographers',
+                data: specializationData.data,
+                backgroundColor: '#36b9cc'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Portfolio Approval{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Portfolio Review</h5>
+                </div>
+                <div class="card-body">
+                    <h4>{{ portfolio.title }}</h4>
+                    <p class="text-muted">
+                        <strong>Photographer:</strong> {{ portfolio.photographer.username }}<br>
+                        <strong>Specialization:</strong> {{ portfolio.get_specialization_display }}<br>
+                        <strong>Experience:</strong> {{ portfolio.experience }} years<br>
+                        <strong>Submitted:</strong> {{ portfolio.created_at|date:"F d, Y" }}
+                    </p>
+
+                    <h5>Description</h5>
+                    <p>{{ portfolio.description }}</p>
+
+                    <h5>Portfolio Images</h5>
+                    <div class="row">
+                        {% for image in portfolio.images.all %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.title }}">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ image.title }}</h6>
+                                        <p class="card-text small">{{ image.description }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <p class="text-muted">No images uploaded yet.</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="action" value="approve" class="btn btn-success">
+                                <i class="fas fa-check"></i> Approve Portfolio
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Reject Portfolio
+                            </button>
+                            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Photographer Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ portfolio.photographer.get_full_name }}</p>
+                    <p><strong>Email:</strong> {{ portfolio.photographer.email }}</p>
+                    <p><strong>Joined:</strong> {{ portfolio.photographer.date_joined|date:"F d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

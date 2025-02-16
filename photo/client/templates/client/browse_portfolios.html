@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Portfolios{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" class="d-flex gap-2">
+                <select name="specialization" class="form-select" style="width: auto;">
+                    <option value="">All Specializations</option>
+                    <option value="portrait" {% if specialization == 'portrait' %}selected{% endif %}>Portrait Photography</option>
+                    <option value="wedding" {% if specialization == 'wedding' %}selected{% endif %}>Wedding Photography</option>
+                    <option value="landscape" {% if specialization == 'landscape' %}selected{% endif %}>Landscape Photography</option>
+                    <option value="fashion" {% if specialization == 'fashion' %}selected{% endif %}>Fashion Photography</option>
+                    <option value="wildlife" {% if specialization == 'wildlife' %}selected{% endif %}>Wildlife Photography</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter Photographers</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for portfolio in portfolios %}
+            <div class="col">
+                <div class="card h-100">
+                    {% with first_image=portfolio.images.first %}
+                        {% if first_image %}
+                            <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ portfolio.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-camera fa-3x"></i>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ portfolio.title }}</h5>
+                        <p class="card-text">{{ portfolio.description|truncatechars:150 }}</p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-camera-retro"></i> {{ portfolio.get_specialization_display }}<br>
+                            <i class="fas fa-star"></i> {{ portfolio.experience }} years experience
+                        </p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-grid">
+                            <a href="{% url 'portfolio_detail' portfolio.id %}" class="btn btn-primary">View Portfolio</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-search fa-4x mb-3 text-muted"></i>
+                <h4>No Portfolios Found</h4>
+                {% if specialization %}
+                    <p class="text-muted">No photographers found with the selected specialization.</p>
+                    <a href="{% url 'browse_portfolios' %}" class="btn btn-primary">View All Photographers</a>
+                {% else %}
+                    <p class="text-muted">There are no approved portfolios available yet.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

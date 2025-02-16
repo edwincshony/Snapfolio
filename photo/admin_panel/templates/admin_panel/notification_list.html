@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Notifications</h5>
+            <div class="btn-group">
+                <a href="?filter=unread" class="btn btn-outline-primary {% if filter == 'unread' %}active{% endif %}">Unread</a>
+                <a href="?filter=all" class="btn btn-outline-primary {% if filter == 'all' %}active{% endif %}">All</a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if notifications %}
+                <div class="list-group">
+                    {% for notification in notifications %}
+                        <div class="list-group-item list-group-item-action {% if not notification.is_read %}active{% endif %}">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <h6 class="mb-1">{{ notification.title }}</h6>
+                                <small class="text-{% if notification.is_read %}muted{% else %}light{% endif %}">
+                                    {{ notification.created_at|timesince }} ago
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ notification.message }}</p>
+                            {% if not notification.is_read %}
+                                <form method="post" action="{% url 'mark_notification_read' notification.id %}" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-light">
+                                        <i class="fas fa-check"></i> Mark as Read
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if notifications.has_other_pages %}
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if notifications.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.previous_page_number }}{% if filter %}&filter={{ filter }}{% endif %}">&laquo;</a>
+                                </li>
+                            {% endif %}
+
+                            {% for i in notifications.paginator.page_range %}
+                                <li class="page-item {% if notifications.number == i %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ i }}{% if filter %}&filter={{ filter }}{% endif %}">{{ i }}</a>
+                                </li>
+                            {% endfor %}
+
+                            {% if notifications.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.next_page_number }}{% if filter %}&filter={{ filter }}{% endif %}">&raquo;</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+                    <h4>No Notifications</h4>
+                    <p class="text-muted">
+                        {% if filter == 'unread' %}
+                            You have no unread notifications.
+                            <a href="?filter=all">View all notifications</a>
+                        {% else %}
+                            You don't have any notifications yet.
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

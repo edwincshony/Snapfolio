@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Portfolio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Edit Your Portfolio</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Title Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Portfolio Title</label>
+                            {{ form.title.errors }}
+                            {{ form.title }}
+                            {% if form.title.help_text %}
+                                <small class="form-text text-muted">{{ form.title.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                            {{ form.description.errors }}
+                            {{ form.description }}
+                            {% if form.description.help_text %}
+                                <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Specialization Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.specialization.id_for_label }}" class="form-label">Specialization</label>
+                            {{ form.specialization.errors }}
+                            <select name="specialization" id="{{ form.specialization.id_for_label }}" class="form-select" required>
+                                <option value="">Select a Specialization</option>
+                                <option value="portrait" {% if form.specialization.value == 'portrait' %}selected{% endif %}>Portrait Photography</option>
+                                <option value="wedding" {% if form.specialization.value == 'wedding' %}selected{% endif %}>Wedding Photography</option>
+                                <option value="landscape" {% if form.specialization.value == 'landscape' %}selected{% endif %}>Landscape Photography</option>
+                                <option value="fashion" {% if form.specialization.value == 'fashion' %}selected{% endif %}>Fashion Photography</option>
+                                <option value="wildlife" {% if form.specialization.value == 'wildlife' %}selected{% endif %}>Wildlife Photography</option>
+                            </select>
+                            {% if form.specialization.help_text %}
+                                <small class="form-text text-muted">{{ form.specialization.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Experience Field -->
+                        <div class="mb-3">
+                            <label for="{{ form.experience.id_for_label }}" class="form-label">Years of Experience</label>
+                            {{ form.experience.errors }}
+                            {{ form.experience }}
+                            {% if form.experience.help_text %}
+                                <small class="form-text text-muted">{{ form.experience.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Update Portfolio</button>
+                            <a href="{% url 'portfolio_detail' request.user.portfolio.id %}" class="btn btn-outline-secondary">Back to Portfolio</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

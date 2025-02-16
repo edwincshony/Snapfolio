@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ portfolio.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>{{ portfolio.title }}</h2>
+                    <p class="text-muted">By {{ portfolio.photographer.get_full_name|default:portfolio.photographer.username }}</p>
+                </div>
+                <div class="card-body">
+                    <p><strong>Specialization:</strong> {{ portfolio.specialization }}</p>
+                    <p><strong>Experience:</strong> {{ portfolio.experience }} years</p>
+                    <p>{{ portfolio.description }}</p>
+                </div>
+            </div>
+
+            <!-- Portfolio Images Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Portfolio Images</h3>
+                    {% if user == portfolio.photographer %}
+                        <a href="{% url 'upload_image' %}" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload New Image
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if portfolio.images.all %}
+                        <div class="row row-cols-1 row-cols-md-3 g-4">
+                            {% for image in portfolio.images.all %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.title }}" style="height: 200px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ image.title }}</h5>
+                                            <p class="card-text">{{ image.description|truncatechars:100 }}</p>
+                                            <p class="text-muted mb-2">
+                                                <small>Category: {{ image.category }}</small><br>
+                                                <small>Uploaded: {{ image.uploaded_at|date:"M d, Y" }}</small>
+                                            </p>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <div class="btn-group w-100">
+                                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editImage-{{ image.id }}">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteImage-{{ image.id }}">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Image Modal -->
+                                <div class="modal fade" id="editImage-{{ image.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'edit_image' image.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Edit Image Details</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label for="title-{{ image.id }}" class="form-label">Title</label>
+                                                        <input type="text" class="form-control" id="title-{{ image.id }}" name="title" value="{{ image.title }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="description-{{ image.id }}" class="form-label">Description</label>
+                                                        <textarea class="form-control" id="description-{{ image.id }}" name="description" rows="3">{{ image.description }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="category-{{ image.id }}" class="form-label">Category</label>
+                                                        <select class="form-select" id="category-{{ image.id }}" name="category">
+                                                            <option value="portrait" {% if image.category == 'portrait' %}selected{% endif %}>Portrait</option>
+                                                            <option value="landscape" {% if image.category == 'landscape' %}selected{% endif %}>Landscape</option>
+                                                            <option value="event" {% if image.category == 'event' %}selected{% endif %}>Event</option>
+                                                            <option value="wedding" {% if image.category == 'wedding' %}selected{% endif %}>Wedding</option>
+                                                            <option value="other" {% if image.category == 'other' %}selected{% endif %}>Other</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Delete Image Modal -->
+                                <div class="modal fade" id="deleteImage-{{ image.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirm Deletion</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you want to delete the image "{{ image.title }}"?</p>
+                                                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <form method="post" action="{% url 'delete_image' image.id %}" style="display: inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-danger">Delete Image</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-images fa-4x mb-3 text-muted"></i>
+                            <h4>No Images Yet</h4>
+                            <p class="text-muted">Start building your portfolio by uploading some images!</p>
+                            <a href="{% url 'upload_image' %}" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload First Image
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            {% if user.is_authenticated and user != portfolio.photographer %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3>Contact Photographer</h3>
+                    </div>
+                    <div class="card-body">
+                        <a href="{% url 'create_booking' portfolio.id %}" class="btn btn-success d-block mb-2">Book a Session</a>
+                        <a href="{% url 'create_inquiry' portfolio.id %}" class="btn btn-info d-block">Send Inquiry</a>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>Client Feedback</h3>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated and user != portfolio.photographer %}
+                        <form method="post">
+                            {% csrf_token %}
+                            {% for field in feedback_form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field.errors }}
+                                    {{ field }}
+                                </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                        </form>
+                        <hr>
+                    {% endif %}
+
+                    {% for fb in feedback %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="card-title">{{ fb.client.get_full_name|default:fb.client.username }}</h5>
+                                    <div class="text-warning">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= fb.rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <p class="card-text">{{ fb.comment }}</p>
+                                {% if fb.photographer_response %}
+                                    <div class="mt-2 p-2 bg-light">
+                                        <strong>Photographer's Response:</strong>
+                                        <p class="mb-0">{{ fb.photographer_response }}</p>
+                                    </div>
+                                {% elif user == portfolio.photographer %}
+                                    <a href="{% url 'respond_to_feedback' fb.id %}" class="btn btn-sm btn-outline-primary">Respond</a>
+                                {% endif %}
+                                <small class="text-muted">{{ fb.created_at|date:"F d, Y" }}</small>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-center">No feedback yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
