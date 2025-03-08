@@ -41,19 +41,25 @@ def edit_portfolio(request):
     return render(request, 'photographer/edit_portfolio.html', {'form': form})
 
 @login_required
-def upload_image(request):
-    portfolio = get_object_or_404(Portfolio, photographer=request.user)
+def upload_image(request, pk):
+    portfolio = get_object_or_404(Portfolio, pk=pk, photographer=request.user)
+    print("✅ Portfolio ID:", portfolio.id)  # Debugging
+
     if request.method == 'POST':
         form = ImageForm(request.POST, request.FILES)
         if form.is_valid():
             image = form.save(commit=False)
-            image.portfolio = portfolio
+            image.portfolio = portfolio  # Assign to correct portfolio
             image.save()
-            messages.success(request, 'Image uploaded successfully!')
-            return redirect('portfolio_detail', pk=portfolio.pk)
+            messages.success(request, '✅ Image uploaded successfully!')
+
+            return redirect('portfolio_detail', pk=portfolio.pk)  # Redirect correctly
+
     else:
         form = ImageForm()
-    return render(request, 'photographer/upload_image.html', {'form': form})
+
+    return render(request, 'photographer/upload_image.html', {'form': form, 'portfolio': portfolio})
+
 
 def portfolio_detail(request, pk):
     portfolio = get_object_or_404(Portfolio, pk=pk)
@@ -138,7 +144,7 @@ def delete_image(request, image_id):
         # Delete the image record
         image.delete()
         
-        messages.success(request, 'Image deleted successfully.')
+        messages.success(request, 'Image deleted successfully.')      
         return redirect('portfolio_detail', pk=portfolio_id)
     
     return redirect('portfolio_detail', pk=image.portfolio.id)

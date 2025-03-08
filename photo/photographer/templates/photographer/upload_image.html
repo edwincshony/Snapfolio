@@ -85,7 +85,8 @@
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Upload Image</button>
-                            <a href="{% url 'portfolio_detail' request.user.portfolio.id %}" class="btn btn-outline-secondary">Back to Portfolio</a>
+                            <a href="{% url 'portfolio_detail' portfolio.id %}" class="btn btn-outline-secondary">Back to Portfolio</a>
+
                         </div>
                     </form>
                 </div>
